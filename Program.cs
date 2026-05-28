@@ -43,14 +43,31 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-    // 🔍 Регистронезависимая проверка на PostgreSQL
-    var isPostgres = connectionString?.IndexOf("Host=", StringComparison.OrdinalIgnoreCase) >= 0
-                  || connectionString?.IndexOf("Username=", StringComparison.OrdinalIgnoreCase) >= 0;
+    // 🔍 Логирование для отладки (видно в Render Logs)
+    var logger = builder.Services.BuildServiceProvider().GetService<ILogger<Program>>();
+    logger?.LogInformation("Connection string: '{Conn}'", connectionString ?? "(null)");
+
+    // Определяем провайдер: если есть "Host=" или "Server=" или "Data Source=/" — это PostgreSQL
+    // Если есть "Data Source=*.db" — это SQLite
+    var isPostgres = !string.IsNullOrWhiteSpace(connectionString) &&
+        (connectionString.Contains("Host=", StringComparison.OrdinalIgnoreCase) ||
+         connectionString.Contains("Server=", StringComparison.OrdinalIgnoreCase) &&
+         !connectionString.Contains("Data Source=", StringComparison.OrdinalIgnoreCase));
 
     if (isPostgres)
+    {
+        logger?.LogInformation("Using PostgreSQL provider");
         options.UseNpgsql(connectionString);
+    }
     else
-        options.UseSqlite(connectionString);
+    {
+        // Fallback на SQLite для локальной разработки
+        var sqlitePath = builder.Environment.IsDevelopment()
+            ? "Data Source=academic.db"
+            : "Data Source=/app/data/academic.db";
+        logger?.LogInformation("Using SQLite provider with: {Path}", sqlitePath);
+        options.UseSqlite(sqlitePath);
+    }
 });
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -71,6 +88,10 @@ builder.Services.AddHttpContextAccessor();
 //    sp.GetRequiredService<CyberLeninkaSearchService>());
 
 var app = builder.Build();
+// Логирование конфигурации при старте
+var config = app.Services.GetRequiredService<IConfiguration>();
+var connStr = config.GetConnectionString("DefaultConnection");
+Console.WriteLine($"🔐 ConnectionString at startup: {(string.IsNullOrWhiteSpace(connStr) ? "(EMPTY)" : connStr.Substring(0, Math.Min(50, connStr.Length)) + "...")}");
 
 if (!app.Environment.IsDevelopment())
 {

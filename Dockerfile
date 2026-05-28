@@ -1,26 +1,35 @@
-# === Runtime stage ===
+# =================================================================
+# ЭТАП 1: СБОРКА (Build stage)
+# =================================================================
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Копируем csproj и восстанавливаем пакеты (кешируем слой)
+COPY ["ChineseAcademicPortal.csproj", "./"]
+RUN dotnet restore "ChineseAcademicPortal.csproj"
+
+# Копируем исходники и публикуем
+COPY . .
+RUN dotnet publish "ChineseAcademicPortal.csproj" -c Release -o /app/publish
+
+# =================================================================
+# ЭТАП 2: РАНТАЙМ (Runtime stage)
+# =================================================================
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
+
+# Копируем опубликованные файлы из этапа build
 COPY --from=build /app/publish .
 
-# Устанавливаем curl для health checks и wait-for-it
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
-
+# Настройки для продакшена
 ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 
-# Создаём скрипт ожидания БД
-RUN echo '#!/bin/bash\n\
-echo "Waiting for PostgreSQL..."\n\
-while ! nc -z $DB_HOST ${DB_PORT:-5432} 2>/dev/null; do\n\
-  sleep 1\n\
-done\n\
-echo "PostgreSQL is up!"\n\
-exec dotnet ChineseAcademicPortal.dll' > /app/entrypoint.sh
+# Создаём папку для данных (если понадобится для бэкапов/логов)
+RUN mkdir -p /app/data
 
-RUN chmod +x /app/entrypoint.sh
-
+# Порт для Render
 EXPOSE 8080
 
-# Запускаем через скрипт ожидания
-ENTRYPOINT ["/app/entrypoint.sh"]
+# Запуск приложения
+ENTRYPOINT ["dotnet", "ChineseAcademicPortal.dll"]

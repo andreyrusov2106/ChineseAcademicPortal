@@ -1,0 +1,42 @@
+﻿@{
+    ViewData["Title"] = "AcademicHub";
+}
+
+<!-- Hero -->
+<section class="hero text-center">
+    <div class="container">
+        <h1>🎓 AcademicHub</h1>
+        <p class="lead">Поиск научных статей и каталог ВАК-журналов для китайских исследователей в России</p>
+        <div class="mt-4">
+            <a asp-controller="Search" asp-action="Index" class="btn btn-light btn-lg px-4 me-2">🔍 Начать поиск</a>
+            <a asp-controller="Vak" asp-action="Index" class="btn btn-outline-light btn-lg px-4">📚 Каталог ВАК</a>
+        </div>
+    </div>
+</section>
+
+<!-- Преимущества -->
+<div class="container mb-5">
+    <div class="row g-4 text-center">
+        <div class="col-md-4">
+            <div class="p-4">
+                <i class="bi bi-search display-6 text-primary"></i>
+                <h5 class="mt-3">Умный поиск</h5>
+                <p class="text-muted small">По статьям из OpenAlex, КиберЛенинки и eLibrary с фильтрами по году и автору</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-4">
+                <i class="bi bi-journal-bookmark display-6 text-primary"></i>
+                <h5 class="mt-3">ВАК-журналы</h5>
+                <p class="text-muted small">Актуальный список рецензируемых журналов с категориями и ссылками</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="p-4">
+                <i class="bi bi-translate display-6 text-primary"></i>
+                <h5 class="mt-3">RU / ZH / EN</h5>
+                <p class="text-muted small">Интерфейс на трёх языках с автоматическим определением предпочтений</p>
+            </div>
+        </div>
+    </div>
+</div>

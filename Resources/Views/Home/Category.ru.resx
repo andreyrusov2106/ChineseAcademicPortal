@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<data name="No links yet" xml:space="preserve">
+    <value>Пока нет ссылок</value>
+  </data>
+	<data name="Added" xml:space="preserve">
+    <value>Добавлено</value>
+  </data>
+	<data name="Back" xml:space="preserve">
+    <value>Назад</value>
+  </data>
+</root>

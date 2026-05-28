@@ -1,0 +1,61 @@
+@using ChineseAcademicPortal.Controllers
+@model ThesisSearchViewModel
+@{
+    ViewData["Title"] = "Поиск диссертаций";
+}
+
+<h1>Поиск диссертаций (РГБ)</h1>
+
+<form method="post" asp-action="Index">
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <label>Автор</label>
+            <input asp-for="Author" class="form-control" />
+        </div>
+        <div class="col-md-3">
+            <label>Название</label>
+            <input asp-for="Title" class="form-control" />
+        </div>
+        <div class="col-md-3">
+            <label>Специальность (шифр)</label>
+            <input asp-for="Speciality" class="form-control" />
+        </div>
+        <div class="col-md-2">
+    <label>Год от</label>
+    <input asp-for="YearFrom" class="form-control" type="number" />
+</div>
+<div class="col-md-2">
+    <label>Год до</label>
+    <input asp-for="YearTo" class="form-control" type="number" />
+</div>
+        <div class="col-md-1 align-self-end">
+            <button type="submit" class="btn btn-primary">Искать</button>
+        </div>
+    </div>
+</form>
+
+@if (Model.Results != null && Model.Results.Any())
+{
+    <p>Найдено @Model.Results.Count записей:</p>
+    <table class="table table-striped">
+        <thead>
+            <tr><th>Название</th><th>Автор</th><th>Специальность</th><th>Год</th><th>Ссылка</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var thesis in Model.Results)
+            {
+                <tr>
+                    <td>@thesis.Title</td>
+                    <td>@thesis.Author</td>
+                    <td>@thesis.Speciality</td>
+                    <td>@thesis.Year</td>
+                    <td><a href="@thesis.Url" target="_blank">Открыть</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else if (Model.Results != null)
+{
+    <div class="alert alert-info">Ничего не найдено.</div>
+}

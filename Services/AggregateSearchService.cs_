@@ -1,0 +1,65 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using ChineseAcademicPortal.Models;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.AspNetCore.Http;
+
+namespace ChineseAcademicPortal.Services
+{
+    public class AggregateSearchService : IArticleSearchService
+    {
+        private readonly CyberLeninkaSearchService _cyberLeninka;
+        private readonly ElibrarySearchService _elibrary;
+        private readonly OpenAlexSearchService _openAlex;
+        private readonly IMemoryCache _cache;
+        private readonly IHttpContextAccessor _httpContextAccessor; // <-- добавили
+
+        public AggregateSearchService(
+            CyberLeninkaSearchService cyberLeninka,
+            ElibrarySearchService elibrary,
+            OpenAlexSearchService openAlex,
+            IMemoryCache cache,
+            IHttpContextAccessor httpContextAccessor) // <-- добавили
+        {
+            _cyberLeninka = cyberLeninka;
+            _elibrary = elibrary;
+            _openAlex = openAlex;
+            _cache = cache;
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        public async Task<List<Article>> SearchAsync(string query, int page = 1)
+        {
+            // Получаем источник из запроса (?source=...) или из сессии
+            var source = _httpContextAccessor.HttpContext?.Request.Query["source"].FirstOrDefault() ?? "openalex";
+
+            var cacheKey = $"agg_{source}_{query}_{page}";
+            if (_cache.TryGetValue(cacheKey, out List<Article> cached))
+                return cached;
+
+            List<Article> results = source.ToLower() switch
+            {
+                "cyberleninka" => await _cyberLeninka.SearchAsync(query, page),
+                "elibrary" => (await _elibrary.SearchAsync(query, page))
+                    .Select(e => new Article
+                    {
+                        Title = e.Title,
+                        Authors = e.Authors,
+                        Source = "eLibrary",
+                        Url = e.Url,
+                        ExtraData = new Dictionary<string, string>
+                        {
+                            ["elibrary_deep_link"] = $"https://elibrary.ru/query_results.asp?query={Uri.EscapeDataString(query)}"
+                        }
+                    }).ToList(),
+                "crossref" => await _openAlex.SearchAsync(query, page, "crossref"),
+                _ => await _openAlex.SearchAsync(query, page, "openalex")
+            };
+
+            _cache.Set(cacheKey, results, TimeSpan.FromMinutes(30));
+            return results;
+        }
+    }
+}

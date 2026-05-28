@@ -1,0 +1,11 @@
+**/.dockerignore
+**/.git
+**/.vs
+**/bin
+**/obj
+**/node_modules
+*.user
+*.suo
+*.pdb
+*.log
+*.userprefs

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<data name="Admin Panel" xml:space="preserve">
+    <value>管理面板</value>
+  </data>
+	<data name="Add Category" xml:space="preserve">
+    <value>添加分类</value>
+  </data>
+	<data name="Edit" xml:space="preserve">
+    <value>编辑</value>
+  </data>
+	<data name="Delete" xml:space="preserve">
+    <value>删除</value>
+  </data>
+	<data name="Add Link" xml:space="preserve">
+    <value>添加链接</value>
+  </data>
+</root>

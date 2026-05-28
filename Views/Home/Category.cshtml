@@ -1,0 +1,24 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IViewLocalizer Localizer
+@model Category
+
+<h1>@(System.Globalization.CultureInfo.CurrentUICulture.Name == "ru" ? Model.NameRu : Model.NameZh)</h1>
+
+@if (!Model.Links.Any())
+{
+<p>@Localizer["No links yet"]</p>
+}
+else
+{
+<ul class="list-group">
+    @foreach (var link in Model.Links)
+        {
+    <li class="list-group-item">
+        <a href="@link.Url" target="_blank">@(System.Globalization.CultureInfo.CurrentUICulture.Name == "ru" ? link.TitleRu : link.TitleZh)</a>
+        <p class="text-muted">@(System.Globalization.CultureInfo.CurrentUICulture.Name == "ru" ? link.DescriptionRu : link.DescriptionZh)</p>
+        <small>@Localizer["Added"]: @link.AddedDate.ToShortDateString()</small>
+    </li>
+        }
+</ul>
+}
+<a asp-action="Index" class="btn btn-secondary mt-3">@Localizer["Back"]</a>

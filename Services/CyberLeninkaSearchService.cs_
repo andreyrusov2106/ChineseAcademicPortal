@@ -1,0 +1,81 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+using HtmlAgilityPack;
+using Microsoft.Extensions.Caching.Memory;
+using ChineseAcademicPortal.Models;
+
+namespace ChineseAcademicPortal.Services
+{
+    public class CyberLeninkaSearchService : IArticleSearchService
+    {
+        private readonly HttpClient _httpClient;
+        private readonly IMemoryCache _cache;
+        private readonly TimeSpan _delay = TimeSpan.FromSeconds(1); // вежливость
+
+        public CyberLeninkaSearchService(IMemoryCache memoryCache)
+        {
+            _httpClient = new HttpClient();
+            _cache = memoryCache;
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
+        }
+
+        public async Task<List<Article>> SearchAsync(string query, int page = 1)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return new List<Article>();
+
+            string cacheKey = $"cyberleninka_{query}_{page}";
+            if (_cache.TryGetValue(cacheKey, out List<Article> cached))
+                return cached;
+
+            await Task.Delay(_delay);
+
+            string url = $"https://cyberleninka.ru/search?q={Uri.EscapeDataString(query)}&page={page}";
+            Console.WriteLine($"[DEBUG] URL: {url}");
+
+            var response = await _httpClient.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"[DEBUG] HTTP Error: {response.StatusCode}");
+                return new List<Article>();
+            }
+
+            var html = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"[DEBUG] HTML length: {html.Length}");
+
+            // Сохраняем HTML в файл для анализа
+            await System.IO.File.WriteAllTextAsync("debug.html", html);
+            Console.WriteLine("[DEBUG] HTML saved to debug.html");
+
+            var doc = new HtmlDocument();
+            doc.LoadHtml(html);
+
+            // Проверяем наличие элементов по разным возможным селекторам
+            var itemNodes = doc.DocumentNode.SelectNodes("//div[contains(@class, 'search-result-item')]");
+            Console.WriteLine($"[DEBUG] search-result-item count: {itemNodes?.Count ?? 0}");
+
+            if (itemNodes == null || itemNodes.Count == 0)
+            {
+                var altNodes = doc.DocumentNode.SelectNodes("//div[contains(@class, 'result')]");
+                Console.WriteLine($"[DEBUG] div[class*=result] count: {altNodes?.Count ?? 0}");
+
+                var articleNodes = doc.DocumentNode.SelectNodes("//article");
+                Console.WriteLine($"[DEBUG] article tags count: {articleNodes?.Count ?? 0}");
+            }
+
+            // Пробуем найти хотя бы один заголовок
+            var anyTitle = doc.DocumentNode.SelectSingleNode("//h2 | //h3 | //h4");
+            if (anyTitle != null)
+                Console.WriteLine($"[DEBUG] Sample title: {anyTitle.InnerText.Trim()}");
+            else
+                Console.WriteLine("[DEBUG] No H2/H3/H4 found");
+
+            // Возвращаем пустой список, так как парсинг пока не работает
+            return new List<Article>();
+        }
+    }
+}

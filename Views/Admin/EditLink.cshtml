@@ -1,0 +1,27 @@
+@model Link
+<h2>Add Link</h2>
+<input type="hidden" asp-for="CategoryId" value="@ViewBag.CategoryId" />
+<form asp-action="AddLink" method="post">
+    <div class="form-group">
+        <label asp-for="TitleRu"></label>
+        <input asp-for="TitleRu" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label asp-for="TitleZh"></label>
+        <input asp-for="TitleZh" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label asp-for="Url"></label>
+        <input asp-for="Url" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label asp-for="DescriptionRu"></label>
+        <textarea asp-for="DescriptionRu" class="form-control"></textarea>
+    </div>
+    <div class="form-group">
+        <label asp-for="DescriptionZh"></label>
+        <textarea asp-for="DescriptionZh" class="form-control"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary mt-2">Save</button>
+    <a asp-action="Index" class="btn btn-secondary mt-2">Cancel</a>
+</form>

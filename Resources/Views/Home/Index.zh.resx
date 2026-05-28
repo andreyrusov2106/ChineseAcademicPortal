@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <data name="Academic Resources" xml:space="preserve">
+    <value>学术资源</value>
+  </data>
+    <data name="LinksCount" xml:space="preserve">
+    <value>链接数量</value>
+  </data>
+    <data name="Browse" xml:space="preserve">
+    <value>浏览</value>
+  </data>
+</root>

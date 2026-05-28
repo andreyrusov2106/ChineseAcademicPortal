@@ -1,0 +1,203 @@
+﻿@using ChineseAcademicPortal.Controllers
+@using System.Web
+@using System.Text
+@model SearchResultViewModel
+@{
+    ViewData["Title"] = "Поиск статей";
+
+    var texts = System.Globalization.CultureInfo.CurrentCulture.Name switch
+{
+    "zh-CN" or "zh" => new {
+        Title = "学术文章搜索 (俄罗斯期刊)",
+        Placeholder = "输入关键词，例如：культура, образование, наука...",
+        Button = "搜索",
+        NoResults = "未找到结果，请尝试其他关键词",
+        ResultsCount = "找到 {0} 篇文章:",
+        Authors = "作者:",
+        Source = "来源:",
+        OpenELibrary = "🔍 eLibrary",
+        OpenScholar = "🎓 Google Scholar",
+        OpenCyber = "📚 КиберЛенинка",
+        CopyTitle = "📋 复制标题",
+        Tip1 = "💡 如果自动搜索未找到结果：",
+        Tip2 = "1. 尝试用英文关键词搜索",
+        Tip3 = "2. 复制文章标题手动粘贴到数据库",
+        Tip4 = "3. 检查拼写或尝试同义词",
+        AuthorLabel = "作者",
+        AuthorPlaceholder = "例如：Ivanov",
+        YearFrom = "起始年份",
+        YearTo = "结束年份",
+        Topic = "主题",
+        TopicPlaceholder = "例如：教育, 医学, AI"
+    },
+    _ => new {
+        Title = "Поиск статей (российские журналы)",
+        Placeholder = "Введите ключевые слова, например: культура, образование, наука...",
+        Button = "Искать",
+        NoResults = "Ничего не найдено. Попробуйте другие ключевые слова.",
+        ResultsCount = "Найдено {0} статей:",
+        Authors = "Авторы:",
+        Source = "Источник:",
+        OpenELibrary = "🔍 eLibrary",
+        OpenScholar = "🎓 Google Scholar",
+        OpenCyber = "📚 КиберЛенинка",
+        CopyTitle = "📋 Копировать",
+        Tip1 = "💡 Если авто-поиск не сработал:",
+        Tip2 = "1. Попробуйте запрос на английском",
+        Tip3 = "2. Скопируйте название и вставьте вручную",
+        Tip4 = "3. Проверьте орфографию или используйте синонимы",
+        AuthorLabel = "Автор",
+        AuthorPlaceholder = "Фамилия (например: Иванов)",
+        YearFrom = "Год от",
+        YearTo = "Год до",
+        Topic = "Тематика",
+        TopicPlaceholder = "например: образование, медицина, ИИ"
+    }
+};
+}
+
+<h1>@texts.Title</h1>
+
+<form method="get" asp-controller="Search" asp-action="Index">
+    <!-- 🔍 ГЛАВНОЕ ПОЛЕ ПОИСКА -->
+    <div class="mb-2">
+        <label class="form-label small text-muted fw-bold">🔍 Поисковый запрос</label>
+        <input type="text" name="q" value="@Model.Query"
+               class="form-control" placeholder="@texts.Placeholder" required />
+    </div>
+
+    <!-- 🎛 ФИЛЬТРЫ -->
+    <div class="row g-2 mb-3 align-items-end">
+        <div class="col-md-2 col-4">
+            <label class="form-label small text-muted">@texts.YearFrom</label>
+            <input type="number" name="yearFrom" value="@ViewBag.YearFrom"
+                   class="form-control form-control-sm" placeholder="2000" min="1900">
+        </div>
+        <div class="col-md-2 col-4">
+            <label class="form-label small text-muted">@texts.YearTo</label>
+            <input type="number" name="yearTo" value="@ViewBag.YearTo"
+                   class="form-control form-control-sm" placeholder="@DateTime.Now.Year" min="1900">
+        </div>
+        <div class="col-md-3 col-6">
+            <label class="form-label small text-muted">@texts.Topic</label>
+            <input type="text" name="topic" value="@ViewBag.Topic"
+                   class="form-control form-control-sm" placeholder="@texts.TopicPlaceholder">
+        </div>
+        <div class="col-md-3 col-6">
+            <label class="form-label small text-muted">@texts.AuthorLabel</label>
+            <input type="text" name="author" value="@ViewBag.Author"
+                   class="form-control form-control-sm" placeholder="@texts.AuthorPlaceholder">
+        </div>
+        <div class="col-md-2 col-12 d-grid mt-2">
+            <button type="submit" class="btn btn-primary btn-sm">@texts.Button</button>
+        </div>
+    </div>
+</form>
+
+<!-- Подсказка, если нет результатов -->
+@if (!string.IsNullOrEmpty(Model.Query) && (Model.Articles == null || !Model.Articles.Any()))
+{
+<div class="alert alert-warning">
+    <strong>@texts.NoResults</strong><br /><br />
+    <small class="text-muted">
+        @texts.Tip1<br />
+        • @texts.Tip2<br />
+        • @texts.Tip3<br />
+        • @texts.Tip4
+    </small>
+</div>
+}
+
+<!-- Результаты поиска -->
+@if (Model.Articles != null && Model.Articles.Any())
+{
+<p class="mt-4"><strong>@string.Format(texts.ResultsCount, Model.Articles.Count)</strong></p>
+
+<ul class="list-group">
+    @foreach (var article in Model.Articles)
+    {
+        // Генерация ссылок для альтернативных источников
+        var titleEncoded = Uri.EscapeDataString(article.Title);
+        var elibraryText = HttpUtility.UrlEncode(article.Title, Encoding.GetEncoding(1251));
+        var elibraryUrl = $"https://elibrary.ru/query_results.asp?text={elibraryText}";
+        var scholarUrl = $"https://scholar.google.com/scholar?q={titleEncoded}";
+        var cyberUrl = $"https://cyberleninka.ru/search?q={titleEncoded}";
+
+    <li class="list-group-item">
+        <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-start gap-2">
+            <!-- Основная информация -->
+            <div class="flex-grow-1">
+                <h5 class="mb-1">
+                    <a href="@article.Url" target="_blank" rel="noopener" class="text-decoration-none">
+                        @article.Title
+                    </a>
+                </h5>
+
+                @if (!string.IsNullOrEmpty(article.Authors))
+                    {
+                <p class="mb-1 text-muted small">
+                    <strong>@texts.Authors</strong> @article.Authors
+                </p>
+                    }
+
+                <p class="mb-2 text-muted small">
+                    <strong>@texts.Source</strong> @article.Source
+                    @if (article.ExtraData?.ContainsKey("openalex_id") == true)
+                        {
+                    <span class="text-muted">• ID: @article.ExtraData["openalex_id"]</span>
+                        }
+                </p>
+
+                <!-- Кнопка копирования названия -->
+                <button class="btn btn-sm btn-outline-secondary me-1"
+                        onclick="navigator.clipboard.writeText('@article.Title.Replace("'", "\\'")').then(() =>
+                    {
+                    const btn = event.currentTarget;
+                    const original = btn.innerHTML;
+                    btn.innerHTML = '✓';
+                    setTimeout(() => btn.innerHTML = original, 1500);
+                    })"
+                    title="@texts.CopyTitle">
+                    @texts.CopyTitle
+                </button>
+            </div>
+
+            <!-- Кнопки альтернативных источников -->
+            <div class="btn-group btn-group-sm flex-wrap" role="group">
+                <a href="@elibraryUrl"
+                   target="_blank"
+                   rel="noopener"
+                   class="btn btn-outline-secondary"
+                   title="@texts.Tip3">
+                    @texts.OpenELibrary
+                </a>
+                <a href="@scholarUrl"
+                   target="_blank"
+                   rel="noopener"
+                   class="btn btn-outline-info">
+                    @texts.OpenScholar
+                </a>
+                <a href="@cyberUrl"
+                   target="_blank"
+                   rel="noopener"
+                   class="btn btn-outline-success">
+                    @texts.OpenCyber
+                </a>
+            </div>
+        </div>
+
+        <!-- Дополнительная подсказка под статьей -->
+        <small class="text-muted d-block mt-2">
+            ⚠️ Если ссылка не открывается: скопируйте название статьи и вставьте вручную в поиск нужной базы.
+        </small>
+    </li>
+    }
+</ul>
+
+ <!-- Пагинация (базовая) -->
+@if (Model.Page > 1)
+    {
+<a href="?q=@Model.Query&page=@(Model.Page - 1)" class="btn btn-secondary mt-3">← Назад</a>
+    }
+<a href="?q=@Model.Query&page=@(Model.Page + 1)" class="btn btn-secondary mt-3">Вперёд →</a>
+}

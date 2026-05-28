@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<data name="Academic Resources" xml:space="preserve">
+    <value>Академические ресурсы</value>
+  </data>
+	<data name="LinksCount" xml:space="preserve">
+    <value>Количество ссылок</value>
+  </data>
+	<data name="Browse" xml:space="preserve">
+    <value>Просмотр</value>
+  </data>
+</root>

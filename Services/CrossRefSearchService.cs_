@@ -1,0 +1,135 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+using System.Linq;
+using Microsoft.Extensions.Caching.Memory;
+using ChineseAcademicPortal.Models;
+
+namespace ChineseAcademicPortal.Services
+{
+    public class CrossRefSearchService : IArticleSearchService
+    {
+        private readonly HttpClient _httpClient;
+        private readonly IMemoryCache _cache;
+
+        public CrossRefSearchService(IMemoryCache memoryCache)
+        {
+            _httpClient = new HttpClient();
+            _cache = memoryCache;
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "AcademicPortal/1.0 (avitocomp1991@mail.ru)");
+        }
+
+        public async Task<List<Article>> SearchAsync(string query, int page = 1)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return new List<Article>();
+
+            string cacheKey = $"crossref_{query}_{page}";
+            if (_cache.TryGetValue(cacheKey, out List<Article> cached))
+                return cached;
+
+            int rows = 20;
+            int offset = (page - 1) * rows;
+            string url = $"https://api.crossref.org/works?query={Uri.EscapeDataString(query)}&rows={rows}&offset={offset}";
+
+            var response = await _httpClient.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
+                return new List<Article>();
+
+            var json = await response.Content.ReadAsStringAsync();
+            var result = JsonSerializer.Deserialize<CrossRefResponse>(json);
+
+            var articles = new List<Article>();
+            if (result?.message?.items == null)
+                return articles;
+
+            foreach (var item in result.message.items)
+            {
+                try
+                {
+                    string title = item.title?.FirstOrDefault() ?? "";
+                    string authors = string.Join(", ", item.author?.Select(a => $"{a.given} {a.family}") ?? Array.Empty<string>());
+
+                    string journal = item.containerTitle ?? "";
+                    string volumeStr = item.volume?.ToString() ?? "";
+                    string issueStr = item.issue?.ToString() ?? "";
+                    string pageStr = item.page ?? "";
+
+                    var sourceParts = new List<string>();
+                    if (!string.IsNullOrEmpty(journal)) sourceParts.Add(journal);
+                    if (!string.IsNullOrEmpty(volumeStr)) sourceParts.Add($"Том {volumeStr}");
+                    if (!string.IsNullOrEmpty(issueStr)) sourceParts.Add($"Вып. {issueStr}");
+                    if (!string.IsNullOrEmpty(pageStr)) sourceParts.Add($"С. {pageStr}");
+                    string source = string.Join(", ", sourceParts);
+
+                    string urlArticle = item.url ?? $"https://doi.org/{item.DOI}";
+
+                    articles.Add(new Article
+                    {
+                        Title = title,
+                        Authors = authors,
+                        Source = source,
+                        Url = urlArticle
+                    });
+                }
+                catch { /* пропускаем проблемные элементы */ }
+            }
+
+            _cache.Set(cacheKey, articles, TimeSpan.FromHours(1));
+            return articles;
+        }
+    }
+
+    // Классы для десериализации JSON CrossRef
+   /* public class CrossRefResponse
+    {
+        public CrossRefMessage message { get; set; }
+    }
+
+    public class CrossRefMessage
+    {
+        public List<CrossRefItem> items { get; set; }
+    }
+
+    public class CrossRefItem
+    {
+        [JsonPropertyName("title")]
+        public List<string> title { get; set; }
+
+        [JsonPropertyName("author")]
+        public List<CrossRefAuthor> author { get; set; }
+
+        [JsonPropertyName("container-title")]
+        public List<string> containerTitleList { get; set; }
+
+        // Удобное свойство для получения названия журнала
+        public string containerTitle => containerTitleList?.FirstOrDefault();
+
+        [JsonPropertyName("volume")]
+        public object volume { get; set; }   // может быть строкой или числом
+
+        [JsonPropertyName("issue")]
+        public object issue { get; set; }    // может быть строкой или числом
+
+        [JsonPropertyName("page")]
+        public string page { get; set; }
+
+        [JsonPropertyName("URL")]
+        public string url { get; set; }
+
+        [JsonPropertyName("DOI")]
+        public string DOI { get; set; }
+    }
+
+    public class CrossRefAuthor
+    {
+        [JsonPropertyName("given")]
+        public string given { get; set; }
+
+        [JsonPropertyName("family")]
+        public string family { get; set; }
+    }*/
+}

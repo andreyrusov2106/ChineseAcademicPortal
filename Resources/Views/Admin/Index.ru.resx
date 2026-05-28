@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<data name="Admin Panel" xml:space="preserve">
+    <value>Панель администратора</value>
+  </data>
+	<data name="Add Category" xml:space="preserve">
+    <value>Добавить категорию</value>
+  </data>
+	<data name="Edit" xml:space="preserve">
+    <value>Редактировать</value>
+  </data>
+	<data name="Delete" xml:space="preserve">
+    <value>Удалить</value>
+  </data>
+	<data name="Add Link" xml:space="preserve">
+    <value>Добавить ссылку</value>
+  </data>
+</root>

@@ -1,0 +1,35 @@
+# .NET
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.user
+*.suo
+*.userprefs
+
+# SQLite & Data
+*.db
+*.db-shm
+*.db-wal
+appsettings.Production.json
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
+
+# IDE
+.vs/
+.vscode/
+.idea/
+*.sln
+*.csproj.user
+
+# Debug & Playwright/Chrome local files
+debug*.json
+debug*.html
+Chrome/
+*.playwright/
+
+# Logs
+*.log
+npm-debug.log*

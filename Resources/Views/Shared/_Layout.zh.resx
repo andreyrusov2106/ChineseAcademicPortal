@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<data name="SearchPageTitle" xml:space="preserve"><value>学术文章搜索</value></data>
+	<data name="SearchPlaceholder" xml:space="preserve"><value>输入关键词...</value></data>
+	<data name="SearchButton" xml:space="preserve"><value>搜索</value></data>
+	<data name="SearchSource" xml:space="preserve"><value>来源:</value></data>
+	<data name="SourceCyberLeninka" xml:space="preserve"><value>КиберЛенинка</value></data>
+	<data name="SourceELibrary" xml:space="preserve"><value>eLibrary.ru</value></data>
+	<data name="SourceCrossref" xml:space="preserve"><value>CrossRef</value></data>
+	<data name="NoResults" xml:space="preserve"><value>未找到结果</value></data>
+	<data name="ResultsCount" xml:space="preserve"><value>找到 {0} 篇文章:</value></data>
+	<data name="Authors" xml:space="preserve"><value>作者:</value></data>
+	<data name="Source" xml:space="preserve"><value>来源:</value></data>
+	<data name="OpenInELibrary" xml:space="preserve"><value>🔍 eLibrary</value></data>
+</root>

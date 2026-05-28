@@ -1,0 +1,14 @@
+@model string
+<h2>Admin Login</h2>
+<form method="post">
+    <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" class="form-control" required />
+    </div>
+    <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+    <button type="submit" class="btn btn-primary mt-2">Login</button>
+</form>
+@if (!ViewContext.ModelState.IsValid)
+{
+<div class="alert alert-danger mt-2">@Html.ValidationSummary()</div>
+}

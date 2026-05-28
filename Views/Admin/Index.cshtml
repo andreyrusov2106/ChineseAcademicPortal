@@ -1,0 +1,27 @@
+@model List<Category>
+    <h2>Admin Panel</h2>
+    <p><a asp-action="AddCategory" class="btn btn-success">Add Category</a></p>
+
+    @foreach (var cat in Model)
+{
+    <div class="card mt-3">
+        <div class="card-header">
+            <strong>@cat.NameRu / @cat.NameZh</strong>
+            <a asp-action="EditCategory" asp-route-id="@cat.Id" class="btn btn-sm btn-primary">Edit</a>
+            <a asp-action="DeleteCategory" asp-route-id="@cat.Id" class="btn btn-sm btn-danger" onclick="return confirm('Delete?')">Delete</a>
+        </div>
+        <ul class="list-group list-group-flush">
+            @foreach (var link in cat.Links)
+            {
+            <li class="list-group-item">
+                <a href="@link.Url" target="_blank">@link.TitleRu / @link.TitleZh</a>
+                <a asp-action="EditLink" asp-route-id="@link.Id" class="btn btn-sm btn-primary float-end">Edit</a>
+                <a asp-action="DeleteLink" asp-route-id="@link.Id" class="btn btn-sm btn-danger float-end me-2" onclick="return confirm('Delete?')">Delete</a>
+            </li>
+            }
+        </ul>
+        <div class="card-footer">
+            <a asp-action="AddLink" asp-route-categoryId="@cat.Id" class="btn btn-sm btn-secondary">Add Link</a>
+        </div>
+    </div>
+}

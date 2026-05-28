@@ -1,0 +1,117 @@
+/* === Глобальные улучшения === */
+:root {
+	--primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	--card-shadow: 0 4px 20px rgba(0,0,0,0.08);
+	--card-hover: 0 8px 30px rgba(0,0,0,0.12);
+}
+
+body {
+	background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+	min-height: 100vh;
+}
+
+/* === Hero-секция для главной === */
+.hero {
+	background: var(--primary-gradient);
+	color: white;
+	padding: 3rem 1rem;
+	border-radius: 0 0 20px 20px;
+	margin-bottom: 2rem;
+}
+
+	.hero h1 {
+		font-weight: 700;
+		margin-bottom: 1rem;
+	}
+
+	.hero .lead {
+		opacity: 0.95;
+		max-width: 600px;
+		margin: 0 auto;
+	}
+
+/* === Карточки статей === */
+.article-card {
+	border: none;
+	border-radius: 12px;
+	box-shadow: var(--card-shadow);
+	transition: transform 0.2s, box-shadow 0.2s;
+	background: white;
+}
+
+	.article-card:hover {
+		transform: translateY(-2px);
+		box-shadow: var(--card-hover);
+	}
+
+	.article-card .btn-group .btn {
+		border-radius: 8px !important;
+		margin: 2px !important;
+		font-size: 0.85rem;
+	}
+
+/* === Поиск с фильтрами === */
+.search-form {
+	background: white;
+	padding: 1.5rem;
+	border-radius: 16px;
+	box-shadow: var(--card-shadow);
+	margin-bottom: 2rem;
+}
+
+	.search-form .form-control:focus {
+		border-color: #667eea;
+		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+	}
+
+/* === Кнопки с градиентом === */
+.btn-gradient {
+	background: var(--primary-gradient);
+	border: none;
+	color: white;
+	transition: opacity 0.2s;
+}
+
+	.btn-gradient:hover {
+		opacity: 0.9;
+		color: white;
+	}
+
+/* === Адаптивность для мобильных === */
+@media (max-width: 768px) {
+	.hero {
+		padding: 2rem 1rem;
+	}
+
+	.search-form {
+		padding: 1rem;
+	}
+
+	.article-card .d-flex {
+		flex-direction: column !important;
+	}
+
+	.btn-group {
+		width: 100%;
+		justify-content: center;
+	}
+}
+
+/* === Тёмная тема (опционально) === */
+[data-theme="dark"] {
+	--bg-primary: #1a1a2e;
+	--bg-secondary: #16213e;
+	--text-primary: #eee;
+	--text-secondary: #aaa;
+}
+
+	[data-theme="dark"] body {
+		background: var(--bg-primary);
+		color: var(--text-primary);
+	}
+
+	[data-theme="dark"] .article-card,
+	[data-theme="dark"] .search-form {
+		background: var(--bg-secondary);
+		border: 1px solid #333;
+	}

@@ -1,21 +1,23 @@
-using Microsoft.EntityFrameworkCore;
+п»їusing Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Globalization;
 using ChineseAcademicPortal.Services;
 using System.Text;
-using Microsoft.Extensions.Localization; // <-- добавь это
+using Microsoft.Extensions.Localization; // <-- РґРѕР±Р°РІСЊ СЌС‚Рѕ
+using System;  // РґР»СЏ StringComparison
+using Npgsql.EntityFrameworkCore.PostgreSQL;  // РґР»СЏ UseNpgsql
 
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 var builder = WebApplication.CreateBuilder(args);
 
-// MVC + локализация (минимальная настройка)
+// MVC + Р»РѕРєР°Р»РёР·Р°С†РёСЏ (РјРёРЅРёРјР°Р»СЊРЅР°СЏ РЅР°СЃС‚СЂРѕР№РєР°)
 builder.Services.AddControllersWithViews()
     .AddViewLocalization()
     .AddDataAnnotationsLocalization();
 
-// Настройка локализации
+// РќР°СЃС‚СЂРѕР№РєР° Р»РѕРєР°Р»РёР·Р°С†РёРё
 var supportedCultures = new[]
 {
     new CultureInfo("ru-RU"),
@@ -35,8 +37,21 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     };
 });
 
+/*builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));*/
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+    // рџ”Ќ Р РµРіРёСЃС‚СЂРѕРЅРµР·Р°РІРёСЃРёРјР°СЏ РїСЂРѕРІРµСЂРєР° РЅР° PostgreSQL
+    var isPostgres = connectionString?.IndexOf("Host=", StringComparison.OrdinalIgnoreCase) >= 0
+                  || connectionString?.IndexOf("Username=", StringComparison.OrdinalIgnoreCase) >= 0;
+
+    if (isPostgres)
+        options.UseNpgsql(connectionString);
+    else
+        options.UseSqlite(connectionString);
+});
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -45,13 +60,13 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Home/Error";
     });
 
-// Регистрация сервисов поиска
-builder.Services.AddLogging(); // Включает поддержку ILogger<T>
+// Р РµРіРёСЃС‚СЂР°С†РёСЏ СЃРµСЂРІРёСЃРѕРІ РїРѕРёСЃРєР°
+builder.Services.AddLogging(); // Р’РєР»СЋС‡Р°РµС‚ РїРѕРґРґРµСЂР¶РєСѓ ILogger<T>
 builder.Services.AddSingleton<IArticleSearchService, OpenAlexSearchService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 
-// Временная регистрация: используем CyberLeninka как основной
+// Р’СЂРµРјРµРЅРЅР°СЏ СЂРµРіРёСЃС‚СЂР°С†РёСЏ: РёСЃРїРѕР»СЊР·СѓРµРј CyberLeninka РєР°Рє РѕСЃРЅРѕРІРЅРѕР№
 //builder.Services.AddSingleton<IArticleSearchService>(sp =>
 //    sp.GetRequiredService<CyberLeninkaSearchService>());
 
@@ -68,7 +83,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseRequestLocalization(); // после UseRouting!
+app.UseRequestLocalization(); // РїРѕСЃР»Рµ UseRouting!
 
 app.MapControllerRoute(
     name: "default",

@@ -1,0 +1,16 @@
+8services:
+  - type: web
+    name: academichub
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__DefaultConnection
+        value: Data Source=/data/academic.db;Cache=Shared
+    disk:
+      name: academichub-data
+      mountPath: /data
+      sizeGB: 1

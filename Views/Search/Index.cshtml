@@ -94,6 +94,8 @@
     </div>
 </form>
 
+<a asp-action="ExportCsv" asp-route-q="@Model.Query" class="btn btn-outline-success btn-sm">📥 Скачать CSV</a>
+
 <!-- Подсказка, если нет результатов -->
 @if (!string.IsNullOrEmpty(Model.Query) && (Model.Articles == null || !Model.Articles.Any()))
 {
@@ -195,9 +197,28 @@
 </ul>
 
  <!-- Пагинация (базовая) -->
-@if (Model.Page > 1)
-    {
-<a href="?q=@Model.Query&page=@(Model.Page - 1)" class="btn btn-secondary mt-3">← Назад</a>
-    }
-<a href="?q=@Model.Query&page=@(Model.Page + 1)" class="btn btn-secondary mt-3">Вперёд →</a>
+@if (Model.TotalPages > 1)
+{
+<nav class="mt-4">
+    <ul class="pagination justify-content-center">
+        @if (Model.Page > 1)
+            {
+        <li class="page-item">
+            <a class="page-link" href="?q=@Model.Query&page=@(Model.Page-1)">← Назад</a>
+        </li>
+            }
+        @for (int i = 1; i <= Model.TotalPages && i <= 5; i++)
+            {
+        <li class="page-item @(i == Model.Page ? "active" : "")">
+            <a class="page-link" href="?q=@Model.Query&page=@i">@i</a>
+        </li>
+            }
+        @if (Model.Page < Model.TotalPages)
+            {
+        <li class="page-item">
+            <a class="page-link" href="?q=@Model.Query&page=@(Model.Page+1)">Вперёд →</a>
+        </li>
+            }
+    </ul>
+</nav>
 }

@@ -6,58 +6,59 @@
     ViewData["Title"] = "Поиск статей";
 
     var texts = System.Globalization.CultureInfo.CurrentCulture.Name switch
-{
-    "zh-CN" or "zh" => new {
-        Title = "学术文章搜索 (俄罗斯期刊)",
-        Placeholder = "输入关键词，例如：культура, образование, наука...",
-        Button = "搜索",
-        NoResults = "未找到结果，请尝试其他关键词",
-        ResultsCount = "找到 {0} 篇文章:",
-        Authors = "作者:",
-        Source = "来源:",
-        OpenELibrary = "🔍 eLibrary",
-        OpenScholar = "🎓 Google Scholar",
-        OpenCyber = "📚 КиберЛенинка",
-        CopyTitle = "📋 复制标题",
-        Tip1 = "💡 如果自动搜索未找到结果：",
-        Tip2 = "1. 尝试用英文关键词搜索",
-        Tip3 = "2. 复制文章标题手动粘贴到数据库",
-        Tip4 = "3. 检查拼写或尝试同义词",
-        AuthorLabel = "作者",
-        AuthorPlaceholder = "例如：Ivanov",
-        YearFrom = "起始年份",
-        YearTo = "结束年份",
-        Topic = "主题",
-        TopicPlaceholder = "例如：教育, 医学, AI"
-    },
-    _ => new {
-        Title = "Поиск статей (российские журналы)",
-        Placeholder = "Введите ключевые слова, например: культура, образование, наука...",
-        Button = "Искать",
-        NoResults = "Ничего не найдено. Попробуйте другие ключевые слова.",
-        ResultsCount = "Найдено {0} статей:",
-        Authors = "Авторы:",
-        Source = "Источник:",
-        OpenELibrary = "🔍 eLibrary",
-        OpenScholar = "🎓 Google Scholar",
-        OpenCyber = "📚 КиберЛенинка",
-        CopyTitle = "📋 Копировать",
-        Tip1 = "💡 Если авто-поиск не сработал:",
-        Tip2 = "1. Попробуйте запрос на английском",
-        Tip3 = "2. Скопируйте название и вставьте вручную",
-        Tip4 = "3. Проверьте орфографию или используйте синонимы",
-        AuthorLabel = "Автор",
-        AuthorPlaceholder = "Фамилия (например: Иванов)",
-        YearFrom = "Год от",
-        YearTo = "Год до",
-        Topic = "Тематика",
-        TopicPlaceholder = "например: образование, медицина, ИИ"
-    }
-};
+    {
+        "zh-CN" or "zh" => new {
+            Title = "学术文章搜索 (俄罗斯期刊)",
+            Placeholder = "输入关键词，例如：культура, образование, наука...",
+            Button = "搜索",
+            NoResults = "未找到结果，请尝试其他关键词",
+            ResultsCount = "找到 {0} 篇文章:",
+            Authors = "作者:",
+            Source = "来源:",
+            OpenELibrary = "🔍 eLibrary",
+            OpenScholar = "🎓 Google Scholar",
+            OpenCyber = "📚 КиберЛенинка",
+            CopyTitle = "📋 复制标题",
+            Tip1 = "💡 如果自动搜索未找到结果：",
+            Tip2 = "1. 尝试用英文关键词搜索",
+            Tip3 = "2. 复制文章标题手动粘贴到数据库",
+            Tip4 = "3. 检查拼写或尝试同义词",
+            AuthorLabel = "作者",
+            AuthorPlaceholder = "例如：Ivanov",
+            YearFrom = "起始年份",
+            YearTo = "结束年份",
+            Topic = "主题",
+            TopicPlaceholder = "例如：教育, 医学, AI"
+        },
+        _ => new {
+            Title = "Поиск статей (российские журналы)",
+            Placeholder = "Введите ключевые слова, например: культура, образование, наука...",
+            Button = "Искать",
+            NoResults = "Ничего не найдено. Попробуйте другие ключевые слова.",
+            ResultsCount = "Найдено {0} статей:",
+            Authors = "Авторы:",
+            Source = "Источник:",
+            OpenELibrary = "🔍 eLibrary",
+            OpenScholar = "🎓 Google Scholar",
+            OpenCyber = "📚 КиберЛенинка",
+            CopyTitle = "📋 Копировать",
+            Tip1 = "💡 Если авто-поиск не сработал:",
+            Tip2 = "1. Попробуйте запрос на английском",
+            Tip3 = "2. Скопируйте название и вставьте вручную",
+            Tip4 = "3. Проверьте орфографию или используйте синонимы",
+            AuthorLabel = "Автор",
+            AuthorPlaceholder = "Фамилия (например: Иванов)",
+            YearFrom = "Год от",
+            YearTo = "Год до",
+            Topic = "Тематика",
+            TopicPlaceholder = "например: образование, медицина, ИИ"
+        }
+    };
 }
 
 <h1>@texts.Title</h1>
 
+<!-- Форма поиска -->
 <form method="get" asp-controller="Search" asp-action="Index">
     <!-- 🔍 ГЛАВНОЕ ПОЛЕ ПОИСКА -->
     <div class="mb-2">
@@ -94,7 +95,21 @@
     </div>
 </form>
 
-<a asp-action="ExportCsv" asp-route-q="@Model.Query" class="btn btn-outline-success btn-sm">📥 Скачать CSV</a>
+<!-- Кнопка экспорта в CSV (показывается только если есть результаты) -->
+@if (!string.IsNullOrEmpty(Model.Query) && Model.Articles != null && Model.Articles.Any())
+{
+<div class="mb-3">
+    <a asp-action="ExportCsv"
+       asp-route-q="@Model.Query"
+       asp-route-yearFrom="@ViewBag.YearFrom"
+       asp-route-yearTo="@ViewBag.YearTo"
+       asp-route-topic="@ViewBag.Topic"
+       asp-route-author="@ViewBag.Author"
+       class="btn btn-success btn-sm">
+        📥 Скачать результаты в CSV
+    </a>
+</div>
+}
 
 <!-- Подсказка, если нет результатов -->
 @if (!string.IsNullOrEmpty(Model.Query) && (Model.Articles == null || !Model.Articles.Any()))
@@ -117,13 +132,13 @@
 
 <ul class="list-group">
     @foreach (var article in Model.Articles)
-    {
-        // Генерация ссылок для альтернативных источников
-        var titleEncoded = Uri.EscapeDataString(article.Title);
-        var elibraryText = HttpUtility.UrlEncode(article.Title, Encoding.GetEncoding(1251));
-        var elibraryUrl = $"https://elibrary.ru/query_results.asp?text={elibraryText}";
-        var scholarUrl = $"https://scholar.google.com/scholar?q={titleEncoded}";
-        var cyberUrl = $"https://cyberleninka.ru/search?q={titleEncoded}";
+        {
+            // Генерация ссылок для альтернативных источников
+            var titleEncoded = Uri.EscapeDataString(article.Title);
+            var elibraryText = HttpUtility.UrlEncode(article.Title, Encoding.GetEncoding(1251));
+            var elibraryUrl = $"https://elibrary.ru/query_results.asp?text={elibraryText}";
+            var scholarUrl = $"https://scholar.google.com/scholar?q={titleEncoded}";
+            var cyberUrl = $"https://cyberleninka.ru/search?q={titleEncoded}";
 
     <li class="list-group-item">
         <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-start gap-2">
@@ -136,18 +151,18 @@
                 </h5>
 
                 @if (!string.IsNullOrEmpty(article.Authors))
-                    {
+                        {
                 <p class="mb-1 text-muted small">
                     <strong>@texts.Authors</strong> @article.Authors
                 </p>
-                    }
+                        }
 
                 <p class="mb-2 text-muted small">
                     <strong>@texts.Source</strong> @article.Source
                     @if (article.ExtraData?.ContainsKey("openalex_id") == true)
-                        {
+                            {
                     <span class="text-muted">• ID: @article.ExtraData["openalex_id"]</span>
-                        }
+                            }
                 </p>
 
                 <!-- Кнопка копирования названия -->
@@ -193,32 +208,74 @@
             ⚠️ Если ссылка не открывается: скопируйте название статьи и вставьте вручную в поиск нужной базы.
         </small>
     </li>
-    }
+        }
 </ul>
 
- <!-- Пагинация (базовая) -->
+ <!-- Пагинация -->
 @if (Model.TotalPages > 1)
-{
-<nav class="mt-4">
+    {
+<nav class="mt-4" aria-label="Навигация по страницам">
     <ul class="pagination justify-content-center">
+        <!-- Кнопка "Назад" -->
         @if (Model.Page > 1)
-            {
+                {
         <li class="page-item">
-            <a class="page-link" href="?q=@Model.Query&page=@(Model.Page-1)">← Назад</a>
+            <a class="page-link"
+               asp-action="Index"
+               asp-route-q="@Model.Query"
+               asp-route-yearFrom="@ViewBag.YearFrom"
+               asp-route-yearTo="@ViewBag.YearTo"
+               asp-route-topic="@ViewBag.Topic"
+               asp-route-author="@ViewBag.Author"
+               asp-route-page="@(Model.Page - 1)"
+               aria-label="Предыдущая">
+                ← Назад
+            </a>
         </li>
-            }
-        @for (int i = 1; i <= Model.TotalPages && i <= 5; i++)
-            {
+                }
+
+        <!-- Номера страниц -->
+        @for (int i = 1; i <= Model.TotalPages && i <= 10; i++)
+                {
         <li class="page-item @(i == Model.Page ? "active" : "")">
-            <a class="page-link" href="?q=@Model.Query&page=@i">@i</a>
+            <a class="page-link"
+               asp-action="Index"
+               asp-route-q="@Model.Query"
+               asp-route-yearFrom="@ViewBag.YearFrom"
+               asp-route-yearTo="@ViewBag.YearTo"
+               asp-route-topic="@ViewBag.Topic"
+               asp-route-author="@ViewBag.Author"
+               asp-route-page="@i">
+                @i
+            </a>
         </li>
-            }
+                }
+
+        @if (Model.TotalPages > 10)
+                {
+        <li class="page-item disabled">
+            <span class="page-link">...</span>
+        </li>
+                }
+
+        <!-- Кнопка "Вперёд" -->
         @if (Model.Page < Model.TotalPages)
-            {
+                {
         <li class="page-item">
-            <a class="page-link" href="?q=@Model.Query&page=@(Model.Page+1)">Вперёд →</a>
+            <a class="page-link"
+               asp-action="Index"
+               asp-route-q="@Model.Query"
+               asp-route-yearFrom="@ViewBag.YearFrom"
+               asp-route-yearTo="@ViewBag.YearTo"
+               asp-route-topic="@ViewBag.Topic"
+               asp-route-author="@ViewBag.Author"
+               asp-route-page="@(Model.Page + 1)"
+               aria-label="Следующая">
+                Вперёд →
+            </a>
         </li>
-            }
+                }
     </ul>
 </nav>
+    }
 }

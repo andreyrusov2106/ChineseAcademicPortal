@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System.Globalization;
 using ChineseAcademicPortal.Services;
+using ChineseAcademicPortal;
 using System.Text;
 using Microsoft.Extensions.Localization;
 using Npgsql.EntityFrameworkCore.PostgreSQL;  // ✅ Обязательно для PostgreSQL
@@ -85,6 +86,8 @@ builder.Services.AddSingleton<IThesisSearchService, RslThesisSearchService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddLogging();
+builder.Services.AddHttpClient<VakJsonImportService>();
+builder.Services.AddHostedService<VakAutoUpdateService>();
 
 var app = builder.Build();
 
@@ -125,6 +128,9 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+
+//builder.Services.AddHostedService<VakImportBackgroundService>();
+
 // Middleware
 if (!app.Environment.IsDevelopment())
 {
@@ -143,3 +149,14 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+
+if (args.Contains("--import-vak-only"))
+{
+    using var scope = app.Services.CreateScope();
+    var importService = scope.ServiceProvider.GetRequiredService<VakJsonImportService>();
+    var count = await importService.ImportFromJsonAsync();
+    Console.WriteLine($"✅ GitHub Actions: Updated {count} VAK journals");
+    return; // Завершаем приложение после импорта
+}
+
+await app.RunAsync();

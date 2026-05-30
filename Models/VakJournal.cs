@@ -11,5 +11,7 @@ namespace ChineseAcademicPortal.Models
         public string Topics { get; set; } = ""; // Тематики через запятую
         public bool IsActive { get; set; } = true;
         public string Note { get; set; } = ""; // Примечание (например, "входит в Scopus")
+        public DateTime? UpdatedAt { get; set; }
+        public string SearchQuery { get; set; } = ""; // Для авто-поиска журнала
     }
 }

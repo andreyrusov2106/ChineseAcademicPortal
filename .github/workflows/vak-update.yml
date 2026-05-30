@@ -1,0 +1,31 @@
+name: Update VAK Journals
+
+on:
+  schedule:
+    # Запуск каждый понедельник в 03:00 UTC
+    - cron: '0 3 * * 1'
+  workflow_dispatch: # Возможность запустить вручную
+
+jobs:
+  update-vak:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Run VAK import
+      env:
+        # Строка подключения к твоей БД на Render
+        ConnectionStrings__DefaultConnection: ${{ secrets.DATABASE_URL }}
+        ASPNETCORE_ENVIRONMENT: Production
+      run: |
+        # Создаём минимальный хост для запуска сервиса
+        dotnet run --project ChineseAcademicPortal.csproj -- --import-vak-only

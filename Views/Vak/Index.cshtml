@@ -1,87 +1,51 @@
-﻿@model List<ChineseAcademicPortal.Models.VakJournal>
+﻿@model IEnumerable<ChineseAcademicPortal.Models.VakJournal>
 @{
     ViewData["Title"] = "Каталог ВАК-журналов";
-    
-    // Простая локализация без .resx (можно позже вынести в ресурсы)
-    var texts = System.Globalization.CultureInfo.CurrentCulture.Name switch
-    {
-        "zh-CN" or "zh" => new {
-            Title = "ВАК期刊目录",
-            Description = "俄罗斯高等认证委员会认可的学术期刊，可用于博士论文答辩",
-            FilterCategory = "按类别筛选",
-            FilterTopic = "按主题筛选",
-            AllCategories = "所有类别",
-            AllTopics = "所有主题",
-            Apply = "应用",
-            Reset = "重置",
-            Name = "期刊名称",
-            ISSN = "ISSN",
-            Topics = "主题",
-            Website = "网站",
-            Note = "备注",
-            NoResults = "未找到符合条件的期刊",
-            Disclaimer = "⚠️ 列表仅供参考。提交论文前请务必在官方渠道验证期刊状态: "
-        },
-        _ => new {
-            Title = "Каталог журналов ВАК РФ",
-            Description = "Рецензируемые журналы из списка ВАК, подходящие для публикации статей по диссертации",
-            FilterCategory = "Фильтр по категории",
-            FilterTopic = "Фильтр по теме",
-            AllCategories = "Все категории",
-            AllTopics = "Все темы",
-            Apply = "Применить",
-            Reset = "Сбросить",
-            Name = "Название журнала",
-            ISSN = "ISSN",
-            Topics = "Тематика",
-            Website = "Сайт",
-            Note = "Примечание",
-            NoResults = "По выбранным фильтрам журналы не найдены",
-            Disclaimer = "⚠️ Список носит ознакомительный характер. Перед подачей статьи обязательно проверьте актуальность журнала на официальном сайте: "
-        }
-    };
 }
 
 <div class="container py-4">
-    <h1>@texts.Title</h1>
-    <p class="text-muted">@texts.Description</p>
+    <h1>📚 Каталог журналов ВАК РФ</h1>
+    <p class="text-muted">Рецензируемые журналы, подходящие для публикации статей по диссертации</p>
 
     <!-- Фильтры -->
     <div class="card mb-4">
         <div class="card-body">
             <form method="get" asp-action="Index" class="row g-3 align-items-end">
+                
+                <!-- Фильтр по индексации -->
                 <div class="col-md-4">
-                    <label class="form-label small text-muted">@texts.FilterCategory</label>
-                    <select name="category" class="form-select">
-                        <option value="">@texts.AllCategories</option>
-                        @foreach (var cat in ViewBag.Categories)
-                        {
-                            <option value="@cat" selected="@(ViewBag.SelectedCategory == cat)">@cat</option>
-                        }
+                    <label class="form-label small text-muted">Тип индексации</label>
+                    <select name="indexType" class="form-select">
+                        <option value="">Все журналы</option>
+                        <option value="ВАК" selected="@(ViewBag.IndexType == "ВАК")">Только ВАК/РИНЦ</option>
+                        <option value="Scopus" selected="@(ViewBag.IndexType == "Scopus")">Scopus</option>
+                        <option value="WoS" selected="@(ViewBag.IndexType == "WoS")">Web of Science</option>
+                        <option value="Scopus+WoS" selected="@(ViewBag.IndexType == "Scopus+WoS")">Scopus + WoS</option>
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label small text-muted">@texts.FilterTopic</label>
-                    <select name="topic" class="form-select">
-                        <option value="">@texts.AllTopics</option>
-                        @foreach (var t in ViewBag.Topics)
-                        {
-                            <option value="@t" selected="@(ViewBag.SelectedTopic == t)">@t</option>
-                        }
-                    </select>
+
+                <!-- Поиск по названию -->
+                <div class="col-md-6">
+                    <label class="form-label small text-muted">Поиск по названию</label>
+                    <input type="text" name="topic" value="@ViewBag.SelectedTopic" 
+                           class="form-control" placeholder="Например: физика, медицина, вестник...">
                 </div>
-                <div class="col-md-4 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">@texts.Apply</button>
-                    <a asp-action="Index" class="btn btn-outline-secondary">@texts.Reset</a>
+
+                <!-- Кнопка -->
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-primary">🔍 Найти</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Результаты -->
-    @if (!Model.Any())
+    @if (Model == null || !Model.Any())
     {
-        <div class="alert alert-warning">@texts.NoResults</div>
+        <div class="alert alert-warning">
+            По выбранным фильтрам журналы не найдены. 
+            <a asp-action="Index" class="alert-link">Сбросить фильтры</a>
+        </div>
     }
     else
     {
@@ -89,11 +53,10 @@
             <table class="table table-striped table-hover align-middle">
                 <thead class="table-dark">
                     <tr>
-                        <th>@texts.Name</th>
-                        <th>@texts.ISSN</th>
-                        <th>@texts.Topics</th>
-                        <th>@texts.Website</th>
-                        <th>@texts.Note</th>
+                        <th>Название журнала</th>
+                        <th>ISSN</th>
+                        <th>Индексация</th>
+                        <th>Сайт</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -101,40 +64,44 @@
                     {
                         <tr>
                             <td>
-                                <strong>@j.NameRu</strong><br/>
+                                <strong>@j.NameRu</strong>
                                 @if (!string.IsNullOrEmpty(j.NameEn))
                                 {
-                                    <small class="text-muted">@j.NameEn</small>
+                                    <br/><small class="text-muted">@j.NameEn</small>
                                 }
                             </td>
                             <td><span class="badge bg-secondary">@j.Issn</span></td>
                             <td>
-                                @if (!string.IsNullOrEmpty(j.Topics))
+                                @if (!string.IsNullOrEmpty(j.Note))
                                 {
-                                    @foreach (var t in j.Topics.Split(',').Select(x => x.Trim()))
+                                    @foreach (var tag in j.Note.Split(',').Select(t => t.Trim()))
                                     {
-                                        <a asp-action="Index" asp-route-topic="@t" class="badge bg-info text-decoration-none me-1">@t</a>
+                                        <span class="badge bg-warning text-dark me-1">@tag</span>
                                     }
                                 }
                             </td>
                             <td>
                                 @if (!string.IsNullOrEmpty(j.Url))
                                 {
-                                    <a href="@j.Url" target="_blank" class="btn btn-sm btn-outline-primary">🌐</a>
+                                    <a href="@j.Url" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">🌐</a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">—</span>
                                 }
                             </td>
-                            <td><small class="text-muted">@j.Note</small></td>
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
+        <small class="text-muted">📊 Найдено: @Model.Count() журналов</small>
     }
 
-    <!-- Дисклеймер -->
     <div class="alert alert-light border mt-4">
         <small class="text-muted">
-            @texts.Disclaimer <a href="https://vak.minobrnauki.gov.ru" target="_blank">vak.minobrnauki.gov.ru</a>
+            ⚠️ Список обновляется автоматически. Перед подачей статьи проверьте актуальность на 
+            <a href="https://vak.minobrnauki.gov.ru" target="_blank">vak.minobrnauki.gov.ru</a>
         </small>
     </div>
 </div>

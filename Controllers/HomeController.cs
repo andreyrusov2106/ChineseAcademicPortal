@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using ChineseAcademicPortal.Models;
+using ChineseAcademicPortal;
+namespace ChineseAcademicPortal.Controllers;
 
 public class HomeController : Controller
 {

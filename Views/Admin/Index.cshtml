@@ -1,4 +1,4 @@
-@model List<Category>
+﻿@model List<Category>
     <h2>Admin Panel</h2>
     <p><a asp-action="AddCategory" class="btn btn-success">Add Category</a></p>
 
@@ -22,6 +22,24 @@
         </ul>
         <div class="card-footer">
             <a asp-action="AddLink" asp-route-categoryId="@cat.Id" class="btn btn-sm btn-secondary">Add Link</a>
+        </div>
+    </div>
+ <!-- Блок импорта ВАК -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">📚 Импорт списка ВАК</div>
+        <div class="card-body">
+            <p class="card-text">
+                Автоматически загрузить актуальный список журналов с
+                <a href="https://vak.gisnauka.ru" target="_blank">vak.gisnauka.ru</a>
+            </p>
+            <a asp-controller="VakImport" asp-action="RunImport"
+               class="btn btn-success"
+               onclick="return confirm('Запустить импорт? Это может занять 1-2 минуты.')">
+                🔄 Запустить импорт сейчас
+            </a>
+            <small class="text-muted d-block mt-2">
+                Последнее обновление: @(ViewBag.LastImport?.ToString("dd.MM.yyyy HH:mm") ?? "Никогда")
+            </small>
         </div>
     </div>
 }

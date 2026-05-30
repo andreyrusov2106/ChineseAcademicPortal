@@ -1,11 +1,14 @@
+п»їusing System.ComponentModel.DataAnnotations;
 namespace ChineseAcademicPortal.Models
 {
     public class Thesis
     {
-        public string Title { get; set; }      // Название диссертации
-        public string Author { get; set; }     // Автор
-        public string Speciality { get; set; } // Шифр специальности (если есть)
-        public string Year { get; set; }       // Год защиты
-        public string Url { get; set; }        // Ссылка на карточку диссертации
+        [Key]  // вњ… РћР±СЏР·Р°С‚РµР»СЊРЅРѕ: РїРµСЂРІРёС‡РЅС‹Р№ РєР»СЋС‡
+        public int Id { get; set; }
+        public string Title { get; set; }      // РќР°Р·РІР°РЅРёРµ РґРёСЃСЃРµСЂС‚Р°С†РёРё
+        public string Author { get; set; }     // РђРІС‚РѕСЂ
+        public string Speciality { get; set; } // РЁРёС„СЂ СЃРїРµС†РёР°Р»СЊРЅРѕСЃС‚Рё (РµСЃР»Рё РµСЃС‚СЊ)
+        public string Year { get; set; }       // Р“РѕРґ Р·Р°С‰РёС‚С‹
+        public string Url { get; set; }        // РЎСЃС‹Р»РєР° РЅР° РєР°СЂС‚РѕС‡РєСѓ РґРёСЃСЃРµСЂС‚Р°С†РёРё
     }
 }
